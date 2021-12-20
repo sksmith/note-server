@@ -1,16 +1,14 @@
 package api
 
 import (
-	"context"
+	"net/http"
+	"time"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/prometheus/client_golang/prometheus"
-	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/sksmith/go-micro-example/core/user"
 )
 
 const DefaultPageLimit = 50
@@ -18,89 +16,15 @@ const DefaultPageLimit = 50
 type CtxKey string
 
 const (
-	CtxKeyLimit CtxKey = "limit"
+	CtxKeyLimit  CtxKey = "limit"
 	CtxKeyOffset CtxKey = "offset"
-	CtxKeyUser CtxKey = "user"
+	CtxKeyUser   CtxKey = "user"
 )
 
 var (
 	urlHitCount *prometheus.CounterVec
-	urlLatency *prometheus.SummaryVec
+	urlLatency  *prometheus.SummaryVec
 )
-
-func Paginate(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		limitStr := r.URL.Query().Get("limit")
-		offsetStr := r.URL.Query().Get("offset")
-
-		var err error
-		limit := DefaultPageLimit
-		if limitStr != "" {
-			limit, err = strconv.Atoi(limitStr)
-			if err != nil {
-				limit = DefaultPageLimit
-			}
-		}
-
-		offset := 0
-		if offsetStr != "" {
-			offset, err = strconv.Atoi(offsetStr)
-			if err != nil {
-				offset = 0
-			}
-		}
-
-		log.Debug().Int("limit", limit).Int("offset", offset).Send()
-		ctx := context.WithValue(r.Context(), CtxKeyLimit, limit)
-		ctx = context.WithValue(ctx, CtxKeyOffset, offset)
-
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-type UserAccess interface {
-	Login(ctx context.Context, username, password string) (user.User, error)
-}
-
-func Authenticate(ua UserAccess) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			username, password, ok := r.BasicAuth()
-
-			if !ok {
-				authErr(w)
-				return
-			}
-
-			u, err := ua.Login(r.Context(), username, password)
-			if err != nil {
-				authErr(w)
-				return
-			}
-
-			ctx := context.WithValue(r.Context(), CtxKeyUser, u)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
-	}
-}
-
-func AdminOnly(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		usr, ok := r.Context().Value(CtxKeyUser).(user.User)
-
-		if !ok || !usr.IsAdmin {
-			authErr(w)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func authErr(w http.ResponseWriter) {
-	w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
-	http.Error(w, "Unauthorized", http.StatusUnauthorized)
-}
 
 func Logging(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
