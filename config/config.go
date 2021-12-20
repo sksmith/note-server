@@ -26,7 +26,6 @@ var (
 const (
 	ApplicationName = "note-server"
 	Revision        = "1"
-	maxRetries      = 5
 )
 
 func LoadConfigs() (Config, error) {
