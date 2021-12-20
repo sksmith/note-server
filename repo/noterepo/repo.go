@@ -48,7 +48,7 @@ func (r *s3Repo) Save(ctx context.Context, note note.Note) error {
 
 func (r *s3Repo) Get(ctx context.Context, id string) (note.Note, error) {
 	data := aws.NewWriteAtBuffer([]byte{})
-	n, err := r.downloader.Download(data, &s3.GetObjectInput{
+	s, err := r.downloader.Download(data, &s3.GetObjectInput{
 		Bucket: aws.String(r.bucket),
 		Key:    aws.String(id),
 	})
@@ -60,13 +60,16 @@ func (r *s3Repo) Get(ctx context.Context, id string) (note.Note, error) {
 		Str("func", "GetNote").
 		Str("id", id).
 		Str("note", string(data.Bytes())).
-		Int64("size", n).
+		Int64("size", s).
 		Msg("downloaded note note")
 
-	note := note.Note{}
-	json.Unmarshal(data.Bytes(), &note)
+	n := note.Note{}
+	err = json.Unmarshal(data.Bytes(), &n)
+	if err != nil {
+		return note.Note{}, err
+	}
 
-	return note, nil
+	return n, nil
 }
 
 func (r *s3Repo) Delete(ctx context.Context, id string) error {
