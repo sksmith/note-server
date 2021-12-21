@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -11,10 +12,15 @@ import (
 )
 
 type NoteApi struct {
-	service note.Service
+	service NoteService
 }
 
-func NewNoteApi(service note.Service) *NoteApi {
+type NoteService interface {
+	GetNote(context.Context, string) (note.Note, error)
+	CreateNote(context.Context, note.Note) error
+}
+
+func NewNoteApi(service NoteService) *NoteApi {
 	return &NoteApi{service: service}
 }
 

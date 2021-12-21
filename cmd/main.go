@@ -25,11 +25,7 @@ func main() {
 	printLogHeader(cfg)
 
 	log.Info().Msg("creating note service...")
-	ir := noterepo.New()
-	noteService := note.NewService(ir)
-
-	log.Info().Msg("configuring metrics...")
-	api.ConfigureMetrics()
+	noteService := note.NewService(noterepo.New())
 
 	log.Info().Msg("configuring router...")
 	r := configureRouter(noteService)
@@ -64,9 +60,10 @@ func printLogHeader(c config.Config) {
 		log.Info().Str("application", c.ApplicationName).
 			Str("revision", c.Revision).
 			Str("version", c.AppVersion).
+			Str("profile", c.Profile).
+			Str("version", c.AppVersion).
 			Str("sha1ver", c.Sha1Version).
 			Str("build-time", c.BuildTime).
-			Str("profile", c.Profile).
 			Send()
 	}
 }
@@ -79,6 +76,8 @@ func configureRouter(service note.Service) chi.Router {
 	r.Use(api.Metrics)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Use(api.Logging)
+
+	api.ConfigureMetrics()
 
 	r.Handle("/metrics", promhttp.Handler())
 
