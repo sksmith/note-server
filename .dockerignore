@@ -1,0 +1,8 @@
+.github/*
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.tmp
+bin/*
