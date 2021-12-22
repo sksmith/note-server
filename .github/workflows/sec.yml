@@ -1,4 +1,4 @@
-name: Sec
+name: Security
 on:
   push:
     branches:
