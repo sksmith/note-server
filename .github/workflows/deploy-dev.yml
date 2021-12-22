@@ -22,11 +22,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Set Build Variables
         run: |
           export VER=$(shell git describe --tag)
-          export SHA1=$(shell git rev-parse HEAD)
-          export NOW=$(shell date -u +'%Y-%m-%d_%TZ')
+          echo "::set-env name=VER::$VER"
 
+          export SHA1=$(shell git rev-parse HEAD)
+          echo "::set-env name=SHA1::$SHA1"
+
+          export NOW=$(shell date -u +'%Y-%m-%d_%TZ')
+          echo "::set-env name=NOW::$NOW"
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1 # TODO Use this repositories preferred method of auth
         with:
