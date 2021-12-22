@@ -1,7 +1,5 @@
 package config
 
-import "os"
-
 type Config struct {
 	Port            string
 	GenerateRoutes  bool
@@ -21,6 +19,7 @@ var (
 	AppVersion  string
 	Sha1Version string
 	BuildTime   string
+	Profile     string
 )
 
 const (
@@ -32,7 +31,7 @@ func LoadConfigs() (Config, error) {
 	cfg := Config{
 		ApplicationName: ApplicationName,
 		Revision:        Revision,
-		Profile:         os.Getenv("PROFILE"),
+		Profile:         Profile,
 		Port:            "80",
 		GenerateRoutes:  false,
 		AppVersion:      AppVersion,
