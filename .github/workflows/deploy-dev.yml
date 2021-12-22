@@ -25,13 +25,13 @@ jobs:
       - name: Set Build Variables
         run: |
           export VER=$(shell git describe --tag)
-          echo "::set-env name=VER::$VER"
+          echo "{VER}={$VER}" >> $GITHUB_ENV
 
           export SHA1=$(shell git rev-parse HEAD)
-          echo "::set-env name=SHA1::$SHA1"
+          echo "{SHA1}={$SHA1}" >> $GITHUB_ENV
 
           export NOW=$(shell date -u +'%Y-%m-%d_%TZ')
-          echo "::set-env name=NOW::$NOW"
+          echo "{NOW}={$NOW}" >> $GITHUB_ENV
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1 # TODO Use this repositories preferred method of auth
         with:
@@ -50,7 +50,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build a docker container and push it to ECR so that it can be deployed to ECS.
-          docker build --build-arg VER=$VER --build-arg SHA1=$SHA1 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --build-arg VER=${{ env.VER }} --build-arg SHA1=${{ env.SHA1 }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
