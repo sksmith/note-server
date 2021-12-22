@@ -33,7 +33,7 @@ func LoadConfigs() (Config, error) {
 		ApplicationName: ApplicationName,
 		Revision:        Revision,
 		Profile:         os.Getenv("PROFILE"),
-		Port:            "8080",
+		Port:            "80",
 		GenerateRoutes:  false,
 		AppVersion:      AppVersion,
 		Sha1Version:     Sha1Version,
