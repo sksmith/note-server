@@ -76,7 +76,7 @@ func parseErrorResponse(w *httptest.ResponseRecorder, t *testing.T) api.ErrRespo
 	}
 
 	e := api.ErrResponse{}
-	json.Unmarshal(data, &e)
+	err = json.Unmarshal(data, &e)
 	if err != nil {
 		t.Errorf("failed to parse response %v", err)
 	}
