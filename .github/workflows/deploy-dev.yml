@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Set Build Variables
         run: |
+          echo "PROF=dev" >> $GITHUB_ENV
           echo "VER=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_ENV
           echo "SHA1=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "NOW=$(date -u +'%Y-%m-%d_%TZ')" >> $GITHUB_ENV
@@ -45,7 +46,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build a docker container and push it to ECR so that it can be deployed to ECS.
-          docker build --build-arg VER=${{ env.VER }} --build-arg SHA1=${{ env.SHA1 }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --build-arg VER=${{ env.VER }} --build-arg SHA1=${{ env.SHA1 }} --build-arg NOW=${{ env.NOW }} --build-arg PROF=${{ env.PROF }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
