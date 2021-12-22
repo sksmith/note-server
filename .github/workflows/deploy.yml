@@ -11,7 +11,7 @@ on:
       - master
 
 env:
-  AWS_REGION: us-east-1                   # set this to your preferred AWS region, e.g. us-west-1
+  AWS_REGION: us-east-2                   # set this to your preferred AWS region, e.g. us-west-1
   ECR_REPOSITORY: note-server             # set this to your Amazon ECR repository name
   ECS_SERVICE: note-server-service        # set this to your Amazon ECS service name
   ECS_CLUSTER: StageCluster               # set this to your Amazon ECS cluster name
