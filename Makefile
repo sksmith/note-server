@@ -4,7 +4,10 @@ NOW := $(shell date -u +'%Y-%m-%d_%TZ')
 
 build:
 	@echo Building the binary
-	go build -ldflags "-X config.AppVersion=$(VER) -X config.Sha1Version=$(SHA1) -X config.BuildTime=$(NOW)" -o ./bin/note-server ./cmd
+	go build -ldflags "-X github.com/sksmith/note-server/config.AppVersion=$(VER)\
+		-X github.com/sksmith/note-server/config.Sha1Version=$(SHA1)\
+		-X github.com/sksmith/note-server/config.BuildTime=$(NOW)"\
+		-o ./bin/note-server ./cmd
 
 test:
 	go test -v ./...
@@ -12,3 +15,10 @@ test:
 run:
 	echo "executing the application"
 	go run ./cmd/.
+
+docker:
+	@echo Building the docker image
+	docker build \
+		--build-arg VER=$(VER) \
+		--build-arg SHA1=$(SHA1) \
+		--build-arg NOW=$(NOW) .
