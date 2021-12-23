@@ -1,6 +1,8 @@
 # Note Server
 
-![Linter](https://github.com/sksmith/note-server/actions/workflows/lint.yml/badge.svg) ![Security](https://github.com/sksmith/note-server/actions/workflows/sec.yml/badge.svg) ![Test](https://github.com/sksmith/note-server/actions/workflows/test.yml/badge.svg)
+![Linter](https://github.com/sksmith/note-server/actions/workflows/lint.yml/badge.svg)
+![Security](https://github.com/sksmith/note-server/actions/workflows/sec.yml/badge.svg)
+![Test](https://github.com/sksmith/note-server/actions/workflows/test.yml/badge.svg)
 
 A basic application that saves notes to and retrieves notes from an aws s3 storage.
 
@@ -19,3 +21,18 @@ If you want to create a deployable executable and run it:
 make build
 ./bin/note-server
 ```
+
+## Setting Up AWS
+
+I have quite a bit in this project automated. Linting, security, and unit testing all execute as
+soon as the master branch gets merged. A deployment to AWS gets kicked off and the application runs
+out in the wild. However, I still needed to setup quite a bit. Here's the list:
+
+- **Elastic Container Registry** - this is where the application images get stored
+  - A new repository needed created here
+- **Elastic Container Service** 
+  - A cluster needed created
+  - A task definition needed defined
+  - A new service needed created using that task definition
+- **LogWatch** - this handles watching the tasks for their logs and gathering them up
+  - A new **loggroup** needed created
