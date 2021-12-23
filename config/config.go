@@ -53,11 +53,8 @@ func LoadConfigs() (Config, error) {
 }
 
 func loadLocalConfigs(cfg *Config) error {
-	// Log Configs
 	cfg.LogLevel = "trace"
 	cfg.LogText = true
-
-	// DB Configs
 	cfg.BucketName = "sksmithnotes"
 	cfg.InMemoryDb = false
 
@@ -65,11 +62,8 @@ func loadLocalConfigs(cfg *Config) error {
 }
 
 func loadEnvironmentConfigs(cfg *Config) error {
-	// Log Configs
 	cfg.LogLevel = "trace"
-	cfg.LogText = true
-
-	// DB Configs
+	cfg.LogText = false
 	cfg.BucketName = "sksmithnotes"
 	cfg.InMemoryDb = true
 
