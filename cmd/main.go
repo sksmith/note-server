@@ -13,6 +13,7 @@ import (
 	"github.com/sksmith/note-server/api"
 	"github.com/sksmith/note-server/config"
 	"github.com/sksmith/note-server/core/note"
+	"github.com/sksmith/note-server/core/user"
 	"github.com/sksmith/note-server/repo/noterepo"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -27,8 +28,11 @@ func main() {
 	log.Info().Msg("creating note service...")
 	noteService := note.NewService(noterepo.New())
 
+	log.Info().Msg("creating user service...")
+	userService := user.NewService()
+
 	log.Info().Msg("configuring router...")
-	r := configureRouter(noteService)
+	r := configureRouter(userService, noteService)
 
 	log.Info().Str("port", cfg.Port).Msg("listening")
 	log.Fatal().Err(http.ListenAndServe(":"+cfg.Port, r))
@@ -68,7 +72,7 @@ func printLogHeader(c config.Config) {
 	}
 }
 
-func configureRouter(service note.Service) chi.Router {
+func configureRouter(userService user.Service, service note.Service) chi.Router {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -81,7 +85,7 @@ func configureRouter(service note.Service) chi.Router {
 
 	r.Handle("/metrics", promhttp.Handler())
 
-	r.Route("/api/v1", func(r chi.Router) {
+	r.With(api.Authenticate(userService)).Route("/api/v1", func(r chi.Router) {
 		r.Route("/note", noteApi(service))
 	})
 

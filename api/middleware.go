@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -45,6 +46,35 @@ func Logging(next http.Handler) http.Handler {
 	}
 
 	return http.HandlerFunc(fn)
+}
+
+type UserAccess interface {
+	Auth(ctx context.Context, username, password string) bool
+}
+
+func Authenticate(ua UserAccess) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			username, password, ok := r.BasicAuth()
+
+			if !ok {
+				authErr(w)
+				return
+			}
+
+			if ua.Auth(r.Context(), username, password) {
+				authErr(w)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func authErr(w http.ResponseWriter) {
+	w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
+	http.Error(w, "Unauthorized", http.StatusUnauthorized)
 }
 
 func ConfigureMetrics() {
