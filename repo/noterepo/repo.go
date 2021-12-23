@@ -24,7 +24,7 @@ func New() note.Repository {
 		Region: aws.String("us-east-1"),
 	}))
 	return &s3Repo{
-		bucket:     "",
+		bucket:     "sksmithnotes",
 		uploader:   s3manager.NewUploader(sess),
 		downloader: s3manager.NewDownloader(sess),
 	}
