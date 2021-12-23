@@ -16,10 +16,13 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
             -X github.com/sksmith/note-server/config.Profile=$PROF" \
     -o ./note-server ./cmd
 
+RUN apk add --update ca-certificates
+
 FROM scratch
 
 WORKDIR /app
 
 COPY --from=builder /app/note-server /usr/bin/
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT ["note-server"]
