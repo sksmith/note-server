@@ -62,7 +62,7 @@ func Authenticate(ua UserAccess) func(http.Handler) http.Handler {
 				return
 			}
 
-			if ua.Auth(r.Context(), username, password) {
+			if !ua.Auth(r.Context(), username, password) {
 				authErr(w)
 				return
 			}
