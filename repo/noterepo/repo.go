@@ -59,7 +59,6 @@ func (r *s3Repo) Get(ctx context.Context, id string) (note.Note, error) {
 	log.Info().
 		Str("func", "GetNote").
 		Str("id", id).
-		Str("note", string(data.Bytes())).
 		Int64("size", s).
 		Msg("downloaded note note")
 
