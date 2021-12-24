@@ -34,5 +34,7 @@ out in the wild. However, I still needed to setup quite a bit. Here's the list:
   - A cluster needed created
   - A task definition needed defined
   - A new service needed created using that task definition
+  - When creating the service, added a load balancer
+  - Assigned a certificate to the load balancer
 - **LogWatch** - this handles watching the tasks for their logs and gathering them up
   - A new **loggroup** needed created

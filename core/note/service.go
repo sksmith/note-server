@@ -12,8 +12,9 @@ func NewService(repo Repository) *service {
 }
 
 type Service interface {
-	GetNote(ctx context.Context, sku string) (Note, error)
-	CreateNote(ctx context.Context, product Note) error
+	GetNote(ctx context.Context, ID string) (Note, error)
+	CreateNote(ctx context.Context, note Note) error
+	DeleteNote(ctx context.Context, ID string) error
 }
 
 type service struct {
@@ -50,7 +51,23 @@ func (s *service) GetNote(ctx context.Context, id string) (Note, error) {
 	return note, nil
 }
 
+func (s *service) DeleteNote(ctx context.Context, id string) error {
+	const funcName = "DeleteNote"
+
+	log.Info().
+		Str("func", funcName).
+		Str("id", id).
+		Msg("deleting note")
+
+	err := s.repo.Delete(ctx, id)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
 type Repository interface {
 	Save(ctx context.Context, note Note) error
-	Get(ctx context.Context, sku string) (Note, error)
+	Get(ctx context.Context, id string) (Note, error)
+	Delete(ctx context.Context, id string) error
 }
