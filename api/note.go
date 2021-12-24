@@ -18,6 +18,7 @@ type NoteApi struct {
 type NoteService interface {
 	GetNote(context.Context, string) (note.Note, error)
 	CreateNote(context.Context, note.Note) error
+	DeleteNote(context.Context, string) error
 }
 
 func NewNoteApi(service NoteService) *NoteApi {
@@ -32,6 +33,7 @@ const (
 func (n *NoteApi) ConfigureRouter(r chi.Router) {
 	r.Put("/", n.Create)
 	r.Get("/{id}", n.Get)
+	r.Delete("/{id}", n.Delete)
 }
 
 type NoteResponse struct {
@@ -76,6 +78,18 @@ func (a *NoteApi) Create(w http.ResponseWriter, r *http.Request) {
 
 	render.Status(r, http.StatusCreated)
 	Render(w, r, NewNoteResponse(*data.Note))
+}
+
+func (a *NoteApi) Delete(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	err := a.service.DeleteNote(r.Context(), id)
+	if err != nil {
+		log.Err(err).Send()
+		Render(w, r, ErrInternalServer)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
 }
 
 type CreateNoteRequest struct {

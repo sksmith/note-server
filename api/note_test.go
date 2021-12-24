@@ -14,7 +14,7 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	r := httptest.NewRequest(http.MethodGet, "/upper?word=abc", nil)
+	r := httptest.NewRequest(http.MethodGet, "/1", nil)
 	w := httptest.NewRecorder()
 
 	noteApi := api.NewNoteApi(mockNoteService{})
@@ -44,6 +44,19 @@ func TestGetError(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	r := httptest.NewRequest(http.MethodDelete, "/1", nil)
+	w := httptest.NewRecorder()
+
+	noteApi := api.NewNoteApi(mockNoteService{})
+
+	noteApi.Delete(w, r)
+
+	if w.Result().StatusCode != 200 {
+		t.Errorf("expected 500 got %v", w.Result().StatusCode)
+	}
+}
+
 type mockNoteService struct{}
 
 func (m mockNoteService) GetNote(context.Context, string) (note.Note, error) {
@@ -57,6 +70,10 @@ func (m mockNoteService) CreateNote(context.Context, note.Note) error {
 	return nil
 }
 
+func (m mockNoteService) DeleteNote(context.Context, string) error {
+	return nil
+}
+
 type mockErrorNoteService struct{}
 
 func (m mockErrorNoteService) GetNote(_ context.Context, _ string) (note.Note, error) {
@@ -65,6 +82,10 @@ func (m mockErrorNoteService) GetNote(_ context.Context, _ string) (note.Note, e
 
 func (m mockErrorNoteService) CreateNote(_ context.Context, _ note.Note) error {
 	return errors.New("something horrible happened")
+}
+
+func (m mockErrorNoteService) DeleteNote(_ context.Context, _ string) error {
+	return errors.New("made up delete failure")
 }
 
 func parseErrorResponse(w *httptest.ResponseRecorder, t *testing.T) api.ErrResponse {

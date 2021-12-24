@@ -29,11 +29,15 @@ var (
 
 func Logging(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI == "/health" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		start := time.Now()
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
 		defer func() {
-			log.Trace().
+			log.Info().
 				Str("method", r.Method).
 				Str("host", r.Host).
 				Str("uri", r.RequestURI).
