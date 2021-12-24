@@ -24,5 +24,6 @@ jobs:
       run: go test ./...
     - uses: sarisia/actions-status-discord@v1
       if: always()
+      description: "Tested Go version ${{ matrix.go-version }} on ${{ matrix.os }}"
       with:
         webhook: ${{ secrets.DISCORD_WEBHOOK }}
