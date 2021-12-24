@@ -83,6 +83,11 @@ func configureRouter(userService user.Service, service note.Service) chi.Router 
 
 	api.ConfigureMetrics()
 
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("UP"))
+	})
+
 	r.Handle("/metrics", promhttp.Handler())
 
 	r.With(api.Authenticate(userService)).Route("/api/v1", func(r chi.Router) {
