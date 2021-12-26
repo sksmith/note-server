@@ -1,8 +1,9 @@
-package db
+package repo
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
@@ -34,7 +35,7 @@ var (
 
 type Metric struct {
 	funcName string
-	start time.Time
+	start    time.Time
 }
 
 func StartMetric(funcName string) *Metric {
