@@ -26,7 +26,7 @@ func main() {
 	printLogHeader(cfg)
 
 	log.Info().Msg("creating note service...")
-	noteService := note.NewService(noterepo.New())
+	noteService := note.NewService(noterepo.NewS3Repo(cfg.Region, cfg.BucketName))
 
 	log.Info().Msg("creating user service...")
 	userService := user.NewService()
@@ -72,7 +72,7 @@ func printLogHeader(c config.Config) {
 	}
 }
 
-func configureRouter(userService user.Service, service note.Service) chi.Router {
+func configureRouter(userService user.Service, service api.NoteService) chi.Router {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -97,7 +97,7 @@ func configureRouter(userService user.Service, service note.Service) chi.Router 
 	return r
 }
 
-func noteApi(s note.Service) func(r chi.Router) {
+func noteApi(s api.NoteService) func(r chi.Router) {
 	noteApi := api.NewNoteApi(s)
 	return noteApi.ConfigureRouter
 }

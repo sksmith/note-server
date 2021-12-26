@@ -1,11 +1,12 @@
 package config
 
+import "flag"
+
 type Config struct {
 	Port            string
-	GenerateRoutes  bool
 	LogLevel        string
 	LogText         bool
-	InMemoryDb      bool
+	Region          string
 	BucketName      string
 	Revision        string
 	ApplicationName string
@@ -19,7 +20,6 @@ var (
 	AppVersion  string
 	Sha1Version string
 	BuildTime   string
-	Profile     string
 )
 
 const (
@@ -28,15 +28,22 @@ const (
 )
 
 func LoadConfigs() (Config, error) {
+	profile := flag.String("P", "local", "profile for the application config")
+	port := flag.String("p", "8080", "port for the application to listen to")
+	region := flag.String("r", "us-east-1", "region the bucket resides in")
+	bucket := flag.String("b", "sksmithnotes", "bucket name for the application to use")
+	flag.Parse()
+
 	cfg := Config{
-		ApplicationName: ApplicationName,
-		Revision:        Revision,
-		Profile:         Profile,
-		Port:            "80",
-		GenerateRoutes:  false,
 		AppVersion:      AppVersion,
-		Sha1Version:     Sha1Version,
+		ApplicationName: ApplicationName,
+		BucketName:      *bucket,
 		BuildTime:       BuildTime,
+		Profile:         *profile,
+		Port:            *port,
+		Region:          *region,
+		Revision:        Revision,
+		Sha1Version:     Sha1Version,
 	}
 
 	if cfg.Profile == "local" {
@@ -55,8 +62,6 @@ func LoadConfigs() (Config, error) {
 func loadLocalConfigs(cfg *Config) error {
 	cfg.LogLevel = "trace"
 	cfg.LogText = true
-	cfg.BucketName = "sksmithnotes"
-	cfg.InMemoryDb = false
 
 	return nil
 }
@@ -64,8 +69,6 @@ func loadLocalConfigs(cfg *Config) error {
 func loadEnvironmentConfigs(cfg *Config) error {
 	cfg.LogLevel = "trace"
 	cfg.LogText = false
-	cfg.BucketName = "sksmithnotes"
-	cfg.InMemoryDb = true
 
 	return nil
 }

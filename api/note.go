@@ -2,12 +2,12 @@ package api
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/rs/zerolog/log"
+	"github.com/sksmith/note-server/core"
 	"github.com/sksmith/note-server/core/note"
 )
 
@@ -16,9 +16,10 @@ type NoteApi struct {
 }
 
 type NoteService interface {
-	GetNote(context.Context, string) (note.Note, error)
-	CreateNote(context.Context, note.Note) error
-	DeleteNote(context.Context, string) error
+	Get(context.Context, string) (note.Note, error)
+	Create(context.Context, note.Note) error
+	Delete(context.Context, string) error
+	List(context.Context, int, int) ([]note.ListNote, error)
 }
 
 func NewNoteApi(service NoteService) *NoteApi {
@@ -31,28 +32,26 @@ const (
 )
 
 func (n *NoteApi) ConfigureRouter(r chi.Router) {
+	r.Get("/", n.List)
 	r.Put("/", n.Create)
 	r.Get("/{id}", n.Get)
 	r.Delete("/{id}", n.Delete)
 }
 
-type NoteResponse struct {
-	note.Note
-}
-
-func NewNoteResponse(n note.Note) *NoteResponse {
-	resp := &NoteResponse{Note: n}
-	return resp
-}
-
-func (nr *NoteResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
-	// Pre-processing before a response is marshalled and sent across the wire
-	return nil
-}
-
 func (a *NoteApi) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	n, err := a.service.GetNote(r.Context(), id)
+	n, err := a.service.Get(r.Context(), id)
+	if err != nil {
+		handleError(w, r, err)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+	Render(w, r, NewNoteResponse(n))
+}
+
+func (a *NoteApi) List(w http.ResponseWriter, r *http.Request) {
+	n, err := a.service.List(r.Context(), 0, 0)
 	if err != nil {
 		log.Err(err).Send()
 		Render(w, r, ErrInternalServer)
@@ -60,7 +59,7 @@ func (a *NoteApi) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Status(r, http.StatusOK)
-	Render(w, r, NewNoteResponse(n))
+	Render(w, r, NewListNoteResponse(n))
 }
 
 func (a *NoteApi) Create(w http.ResponseWriter, r *http.Request) {
@@ -70,9 +69,8 @@ func (a *NoteApi) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := a.service.CreateNote(r.Context(), *data.Note); err != nil {
-		log.Err(err).Send()
-		Render(w, r, ErrInternalServer)
+	if err := a.service.Create(r.Context(), *data.Note); err != nil {
+		handleError(w, r, err)
 		return
 	}
 
@@ -82,36 +80,20 @@ func (a *NoteApi) Create(w http.ResponseWriter, r *http.Request) {
 
 func (a *NoteApi) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	err := a.service.DeleteNote(r.Context(), id)
+	err := a.service.Delete(r.Context(), id)
 	if err != nil {
-		log.Err(err).Send()
-		Render(w, r, ErrInternalServer)
+		handleError(w, r, err)
 		return
 	}
 
 	render.Status(r, http.StatusOK)
 }
 
-type CreateNoteRequest struct {
-	*note.Note
-}
-
-func (p *CreateNoteRequest) Bind(_ *http.Request) error {
-	if p.Note.ID == "" || p.Note.Note == "" {
-		return errors.New("missing required field(s)")
-	}
-
-	return nil
-}
-
-func Render(w http.ResponseWriter, r *http.Request, rnd render.Renderer) {
-	if err := render.Render(w, r, rnd); err != nil {
-		log.Warn().Err(err).Msg("failed to render")
-	}
-}
-
-func RenderList(w http.ResponseWriter, r *http.Request, l []render.Renderer) {
-	if err := render.RenderList(w, r, l); err != nil {
-		log.Warn().Err(err).Msg("failed to render")
+func handleError(w http.ResponseWriter, r *http.Request, err error) {
+	log.Err(err).Send()
+	if core.IsErrNotFound(err) {
+		ErrNotFound.Render(w, r)
+	} else {
+		ErrInternalServer.Render(w, r)
 	}
 }

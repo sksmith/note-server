@@ -18,3 +18,4 @@ vendor/
 
 # IDE Configurations
 .idea
+.vscode

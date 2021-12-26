@@ -14,11 +14,10 @@ test:
 
 run:
 	echo "executing the application"
-	go run ./cmd/.
+	go run ./cmd/. -p 8080 -P local -b sksmithnotes
 
 docker:
 	@echo Building the docker image
 	docker build \
 		--build-arg VER=$(VER) \
-		--build-arg SHA1=$(SHA1) \
-		--build-arg NOW=$(NOW) .
+		--build-arg SHA1=$(SHA1) \port
