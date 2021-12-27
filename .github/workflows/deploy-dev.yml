@@ -27,7 +27,8 @@ jobs:
     secrets:
       webhook: ${{ secrets.DISCORD_WEBHOOK }}
   deploy:
-    name: Deploy
+    name: Deploy to Dev
+    needs: [lint, security, test]
     runs-on: ubuntu-latest
     environment: development
 
