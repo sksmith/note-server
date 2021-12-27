@@ -85,7 +85,7 @@ func configureRouter(userService user.Service, service api.NoteService) chi.Rout
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("UP"))
+		w.Write([]byte("UP"))
 	})
 
 	r.Handle("/metrics", promhttp.Handler())
