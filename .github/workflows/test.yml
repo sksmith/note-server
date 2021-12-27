@@ -1,8 +1,10 @@
 name: Test
 on:
-  push:
-    branches:
-      - master
+  workflow_call:
+    inputs:
+    secrets:
+      webhook:
+        required: true
   pull_request:
     branches:
       - master
@@ -26,4 +28,4 @@ jobs:
       if: always()
       with:
         description: "Tested Go version ${{ matrix.go-version }} on ${{ matrix.os }}"
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        webhook: ${{ secrets.webhook }}
