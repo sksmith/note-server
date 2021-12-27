@@ -22,6 +22,24 @@ make build
 ./bin/note-server
 ```
 
+For doing local development, you'll want linting, and security tooling. Run this to install them.
+
+```shell
+make tools
+```
+
+To run the linter, security check, and tests:
+
+```shell
+make check
+```
+
+To just run the tests alone:
+
+```shell
+make test
+```
+
 ## Setting Up AWS
 
 I have quite a bit in this project automated. Linting, security, and unit testing all execute as

@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/sksmith/note-server/core"
 	"github.com/sksmith/note-server/core/note"
@@ -46,19 +47,16 @@ func (a *NoteApi) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.Status(r, http.StatusOK)
 	Render(w, r, NewNoteResponse(n))
 }
 
 func (a *NoteApi) List(w http.ResponseWriter, r *http.Request) {
 	n, err := a.service.List(r.Context(), 0, 0)
 	if err != nil {
-		log.Err(err).Send()
-		Render(w, r, ErrInternalServer)
+		handleError(w, r, err)
 		return
 	}
 
-	render.Status(r, http.StatusOK)
 	Render(w, r, NewListNoteResponse(n))
 }
 
@@ -86,14 +84,15 @@ func (a *NoteApi) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.Status(r, http.StatusOK)
+	render.NoContent(w, r)
 }
 
 func handleError(w http.ResponseWriter, r *http.Request, err error) {
 	log.Err(err).Send()
-	if core.IsErrNotFound(err) {
-		ErrNotFound.Render(w, r)
-	} else {
-		ErrInternalServer.Render(w, r)
+	switch errors.Cause(err).(type) {
+	case *core.ErrNotFound:
+		Render(w, r, ErrNotFound)
+	default:
+		Render(w, r, ErrInternalServer)
 	}
 }
