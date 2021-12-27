@@ -80,12 +80,12 @@ jobs:
           wait-for-service-stability: true
   notify:
     name: Notification
-    needs: [lint, security, test, deploy]
+    needs: [deploy]
     runs-on: ubuntu-latest
     steps:
       - uses: sarisia/actions-status-discord@v1
         if: always()
         with:
           username: Dev Deployment
-          description: A pull request has been made
+          description: A deployment to the development environment has been attempted
           webhook: ${{ secrets.DISCORD_WEBHOOK }}

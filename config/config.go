@@ -17,21 +17,39 @@ type Config struct {
 }
 
 var (
+	// Runtime flags
+	bucket  *string
+	port    *string
+	profile *string
+	region  *string
+
+	// Build time arguments
 	AppVersion  string
 	Sha1Version string
 	BuildTime   string
 )
 
 const (
+	// Build time arguments
 	ApplicationName = "note-server"
 	Revision        = "1"
+
+	// Default runtime arguments
+	DefaultBucket  = "sksmithnotes"
+	DefaultPort    = "8080"
+	DefaultProfile = "local"
+	DefaultRegion  = "us-east-1"
+
+	// Default runtime arguments when running locally
+	DefaultLocalLogLevel = "trace"
+	DefaultLocalLogText  = true
+
+	// Default runtime arguments when running remotely
+	DefaultEnvironmentLogLevel = "trace"
+	DefaultEnvironmentLogText  = false
 )
 
 func LoadConfigs() (Config, error) {
-	profile := flag.String("P", "local", "profile for the application config")
-	port := flag.String("p", "8080", "port for the application to listen to")
-	region := flag.String("r", "us-east-1", "region the bucket resides in")
-	bucket := flag.String("b", "sksmithnotes", "bucket name for the application to use")
 	flag.Parse()
 
 	cfg := Config{
@@ -60,15 +78,23 @@ func LoadConfigs() (Config, error) {
 }
 
 func loadLocalConfigs(cfg *Config) error {
-	cfg.LogLevel = "trace"
-	cfg.LogText = true
+	cfg.LogLevel = DefaultLocalLogLevel
+	cfg.LogText = DefaultLocalLogText
 
 	return nil
 }
 
 func loadEnvironmentConfigs(cfg *Config) error {
-	cfg.LogLevel = "trace"
-	cfg.LogText = false
+	cfg.LogLevel = DefaultEnvironmentLogLevel
+	cfg.LogText = DefaultEnvironmentLogText
 
 	return nil
+}
+
+func init() {
+	// Set runtime arguments
+	profile = flag.String("P", DefaultProfile, "profile for the application config")
+	port = flag.String("p", DefaultPort, "port for the application to listen to")
+	region = flag.String("r", DefaultRegion, "region the bucket resides in")
+	bucket = flag.String("b", DefaultBucket, "bucket name for the application to use")
 }

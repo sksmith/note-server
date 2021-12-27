@@ -63,6 +63,7 @@ func (a *NoteApi) List(w http.ResponseWriter, r *http.Request) {
 func (a *NoteApi) Create(w http.ResponseWriter, r *http.Request) {
 	data := &CreateNoteRequest{}
 	if err := render.Bind(r, data); err != nil {
+		log.Err(err).Send()
 		Render(w, r, ErrInvalidRequest(err))
 		return
 	}
@@ -79,8 +80,8 @@ func (a *NoteApi) Create(w http.ResponseWriter, r *http.Request) {
 func (a *NoteApi) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	err := a.service.Delete(r.Context(), id)
-	if err != nil {
-		handleError(w, r, err)
+	if err != nil && !core.IsErrNotFound(err) {
+		Render(w, r, ErrInternalServer)
 		return
 	}
 
