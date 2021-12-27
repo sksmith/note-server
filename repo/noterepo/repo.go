@@ -75,7 +75,7 @@ func (r *s3Repo) Get(ctx context.Context, id string) (note.Note, error) {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case s3.ErrCodeNoSuchKey:
-				return note.Note{}, core.ErrNotFound{}
+				return note.Note{}, &core.ErrNotFound{}
 			default:
 				return note.Note{}, err
 			}
@@ -206,7 +206,7 @@ func (r *s3Repo) getIndex(ctx context.Context) ([]note.ListNote, error) {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case s3.ErrCodeNoSuchKey:
-				return []note.ListNote{}, core.ErrNotFound{}
+				return []note.ListNote{}, &core.ErrNotFound{}
 			default:
 				return []note.ListNote{}, err
 			}
