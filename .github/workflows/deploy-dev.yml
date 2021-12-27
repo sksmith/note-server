@@ -14,8 +14,18 @@ env:
   CONTAINER_NAME: note-server
 
 jobs:
-  validate:
-    uses: sksmith/note-server/.github/workflows/validate.yml@master
+  lint:
+    uses: sksmith/note-server/.github/workflows/lint.yml@master
+    secrets:
+      webhook: ${{ secrets.DISCORD_WEBHOOK }}
+  security:
+    uses: sksmith/note-server/.github/workflows/sec.yml@master
+    secrets:
+      webhook: ${{ secrets.DISCORD_WEBHOOK }}
+  test:
+    uses: sksmith/note-server/.github/workflows/test.yml@master
+    secrets:
+      webhook: ${{ secrets.DISCORD_WEBHOOK }}
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
