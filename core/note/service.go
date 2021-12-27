@@ -67,7 +67,7 @@ func (s *service) Delete(ctx context.Context, id string) error {
 }
 
 func (s *service) List(ctx context.Context, startIdx, endIdx int) ([]ListNote, error) {
-	const funcName = "DeleteNote"
+	const funcName = "ListNote"
 
 	log.Info().
 		Str("func", funcName).
