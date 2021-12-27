@@ -30,7 +30,7 @@ docker:
 	@echo Building the docker image
 	docker build \
 		--build-arg VER=$(VER) \
-		--build-arg SHA1=$(SHA1) \port
+		--build-arg SHA1=$(SHA1) .
 
 tools:
 	go install github.com/securego/gosec/v2/cmd/gosec@latest

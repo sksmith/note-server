@@ -19,8 +19,17 @@ If you want to create a deployable executable and run it:
 
 ```shell
 make build
-./bin/note-server
+./bin/note-server -P <profile> -p <port> -r <region> -b <bucket>
 ```
+
+If you want to run the application using a local docker image:
+
+```shell
+make docker
+docker run <image> -P <profile> -p <port> -r <region> -b <bucket>
+```
+
+## Local Development
 
 For doing local development, you'll want linting, and security tooling. Run this to install them.
 
