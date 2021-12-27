@@ -5,14 +5,14 @@ on:
       - master
 jobs:
   lint:
-    - uses: sksmith/note-server/.github/workflows/lint.yml@master
-      secrets:
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+    uses: sksmith/note-server/.github/workflows/lint.yml@master
+    secrets:
+      webhook: ${{ secrets.DISCORD_WEBHOOK }}
   security:
-    - uses: sksmith/note-server/.github/workflows/sec.yml@master
-      secrets:
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+    uses: sksmith/note-server/.github/workflows/sec.yml@master
+    secrets:
+      webhook: ${{ secrets.DISCORD_WEBHOOK }}
   test:
-    - uses: sksmith/note-server/.github/workflows/test.yml@master
-      secrets:
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+    uses: sksmith/note-server/.github/workflows/test.yml@master
+    secrets:
+      webhook: ${{ secrets.DISCORD_WEBHOOK }}

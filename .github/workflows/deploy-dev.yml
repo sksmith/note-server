@@ -15,7 +15,7 @@ env:
 
 jobs:
   validate:
-    - uses: sksmith/note-server/.github/workflows/validate.yml@master
+    uses: sksmith/note-server/.github/workflows/validate.yml@master
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
