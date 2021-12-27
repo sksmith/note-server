@@ -80,11 +80,11 @@ jobs:
           wait-for-service-stability: true
   notify:
     name: Notification
+    if: always()
     needs: [lint, security, test, deploy]
     runs-on: ubuntu-latest
     steps:
       - uses: sarisia/actions-status-discord@v1
-        if: always()
         with:
           username: Dev Deployment
           description: A deployment to the development environment has been attempted
