@@ -78,8 +78,12 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
-
-      - uses: sarisia/actions-status-discord@v1
-        if: always()
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+  notify:
+    name: Notification
+    needs: [lint, security, test, deploy]
+    uses: sarisia/actions-status-discord@v1
+    if: always()
+    with:
+      username: Dev Deployment
+      description: A pull request has been made
+      webhook: ${{ secrets.DISCORD_WEBHOOK }}
