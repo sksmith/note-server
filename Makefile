@@ -20,7 +20,7 @@ build:
 		-o ./bin/note-server ./cmd
 
 test:
-	go test -v ./...
+	go test -v -cover ./...
 
 run:
 	echo "executing the application"

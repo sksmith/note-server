@@ -5,6 +5,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
@@ -12,6 +16,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/sksmith/note-server/api"
 	"github.com/sksmith/note-server/config"
+	"github.com/sksmith/note-server/core"
 	"github.com/sksmith/note-server/core/note"
 	"github.com/sksmith/note-server/core/user"
 	"github.com/sksmith/note-server/repo/noterepo"
@@ -26,7 +31,14 @@ func main() {
 	printLogHeader(cfg)
 
 	log.Info().Msg("creating note service...")
-	noteService := note.NewService(noterepo.NewS3Repo(cfg.Region, cfg.BucketName))
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(cfg.Region),
+	}))
+	downloader := s3manager.NewDownloader(sess)
+	uploader := s3manager.NewUploader(sess)
+	deleter := s3.New(sess)
+	repo := noterepo.NewS3Repo(uploader, downloader, deleter, cfg.BucketName)
+	noteService := note.NewService(core.NewClock(), repo)
 
 	log.Info().Msg("creating user service...")
 	userService := user.NewService()
@@ -85,7 +97,7 @@ func configureRouter(userService user.Service, service api.NoteService) chi.Rout
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("UP"))
+		_, _ = w.Write([]byte("UP"))
 	})
 
 	r.Handle("/metrics", promhttp.Handler())
