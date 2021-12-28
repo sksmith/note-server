@@ -30,14 +30,10 @@ func main() {
 	configLogging(cfg)
 	printLogHeader(cfg)
 
+	log.Info().Msg("creating note repository...")
+	repo := createNoteRepo(cfg)
+
 	log.Info().Msg("creating note service...")
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(cfg.Region),
-	}))
-	downloader := s3manager.NewDownloader(sess)
-	uploader := s3manager.NewUploader(sess)
-	deleter := s3.New(sess)
-	repo := noterepo.NewS3Repo(uploader, downloader, deleter, cfg.BucketName)
 	noteService := note.NewService(core.NewClock(), repo)
 
 	log.Info().Msg("creating user service...")
@@ -48,6 +44,16 @@ func main() {
 
 	log.Info().Str("port", cfg.Port).Msg("listening")
 	log.Fatal().Err(http.ListenAndServe(":"+cfg.Port, r))
+}
+
+func createNoteRepo(cfg config.Config) note.Repository {
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(cfg.Region),
+	}))
+	downloader := s3manager.NewDownloader(sess)
+	uploader := s3manager.NewUploader(sess)
+	deleter := s3.New(sess)
+	return noterepo.NewS3Repo(uploader, downloader, deleter, cfg.BucketName)
 }
 
 func loadConfigs() (cfg config.Config) {
