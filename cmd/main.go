@@ -81,7 +81,6 @@ func printLogHeader(c config.Config) {
 	} else {
 		log.Info().Str("application", c.ApplicationName).
 			Str("revision", c.Revision).
-			Str("version", c.AppVersion).
 			Str("profile", c.Profile).
 			Str("version", c.AppVersion).
 			Str("sha1ver", c.Sha1Version).
