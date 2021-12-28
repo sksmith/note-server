@@ -4,8 +4,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/rs/zerolog"
 	"github.com/sksmith/note-server/config"
 )
+
+func TestMain(m *testing.M) {
+	zerolog.SetGlobalLevel(zerolog.Disabled)
+	os.Exit(m.Run())
+}
 
 func TestLoadLocalConfigs(t *testing.T) {
 	config.AppVersion = "appversion"

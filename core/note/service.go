@@ -2,18 +2,19 @@ package note
 
 import (
 	"context"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+	"github.com/sksmith/note-server/core"
 )
 
-func NewService(repo Repository) *service {
-	return &service{repo: repo}
+func NewService(clock core.Clock, repo Repository) *service {
+	return &service{clock: clock, repo: repo}
 }
 
 type service struct {
-	repo Repository
+	repo  Repository
+	clock core.Clock
 }
 
 func (s *service) Create(ctx context.Context, note Note) error {
@@ -25,9 +26,9 @@ func (s *service) Create(ctx context.Context, note Note) error {
 		Msg("creating note")
 
 	if note.Created.IsZero() {
-		note.Created = time.Now().UTC()
+		note.Created = s.clock.Now()
 	}
-	note.Updated = time.Now().UTC()
+	note.Updated = s.clock.Now()
 
 	if err := s.repo.Save(ctx, note); err != nil {
 		return errors.WithStack(err)

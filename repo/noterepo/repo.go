@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/rs/zerolog/log"
@@ -17,28 +17,35 @@ import (
 
 type s3Repo struct {
 	bucket     string
-	uploader   *s3manager.Uploader
-	downloader *s3manager.Downloader
-	svc        *s3.S3
+	uploader   Uploader
+	downloader Downloader
+	deleter    Deleter
 }
 
-const indexID = "index"
+const IndexID = "index"
 
-func NewS3Repo(region, bucket string) note.Repository {
+type Downloader interface {
+	Download(w io.WriterAt, input *s3.GetObjectInput, options ...func(*s3manager.Downloader)) (n int64, err error)
+}
+
+type Uploader interface {
+	Upload(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
+}
+
+type Deleter interface {
+	DeleteObject(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error)
+}
+
+func NewS3Repo(uploader Uploader, downloader Downloader, deleter Deleter, bucket string) *s3Repo {
 	log.Info().
 		Str("func", "NewS3Repo").
-		Str("region", region).
-		Str("bucket", bucket).
 		Msg("setting up s3 session")
 
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(region),
-	}))
 	return &s3Repo{
 		bucket:     bucket,
-		svc:        s3.New(sess),
-		uploader:   s3manager.NewUploader(sess),
-		downloader: s3manager.NewDownloader(sess),
+		deleter:    deleter,
+		uploader:   uploader,
+		downloader: downloader,
 	}
 }
 
@@ -79,6 +86,8 @@ func (r *s3Repo) Get(ctx context.Context, id string) (note.Note, error) {
 			default:
 				return note.Note{}, err
 			}
+		} else {
+			return note.Note{}, err
 		}
 	}
 
@@ -98,7 +107,7 @@ func (r *s3Repo) Get(ctx context.Context, id string) (note.Note, error) {
 }
 
 func (r *s3Repo) Delete(ctx context.Context, id string) error {
-	_, err := r.svc.DeleteObject(&s3.DeleteObjectInput{
+	_, err := r.deleter.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(r.bucket),
 		Key:    aws.String(id),
 	})
@@ -125,7 +134,7 @@ func (r *s3Repo) List(ctx context.Context, startIdx, endIdx int) ([]note.ListNot
 		}
 	}
 
-	_ = removeListNote(&idx, indexID)
+	_ = removeListNote(&idx, IndexID)
 
 	return idx, nil
 }
@@ -200,7 +209,7 @@ func (r *s3Repo) getIndex(ctx context.Context) ([]note.ListNote, error) {
 	data := aws.NewWriteAtBuffer([]byte{})
 	s, err := r.downloader.Download(data, &s3.GetObjectInput{
 		Bucket: aws.String(r.bucket),
-		Key:    aws.String(indexID),
+		Key:    aws.String(IndexID),
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -210,6 +219,8 @@ func (r *s3Repo) getIndex(ctx context.Context) ([]note.ListNote, error) {
 			default:
 				return []note.ListNote{}, err
 			}
+		} else {
+			return []note.ListNote{}, err
 		}
 	}
 
@@ -234,7 +245,7 @@ func (r *s3Repo) saveIndex(ctx context.Context, idx []note.ListNote) error {
 	}
 	_, err = r.uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(r.bucket),
-		Key:    aws.String(indexID),
+		Key:    aws.String(IndexID),
 		Body:   bytes.NewReader(data),
 	})
 	if err != nil {
