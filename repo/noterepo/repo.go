@@ -95,7 +95,7 @@ func (r *s3Repo) Get(ctx context.Context, id string) (note.Note, error) {
 		Str("func", "GetNote").
 		Str("id", id).
 		Int64("size", s).
-		Msg("downloaded note note")
+		Msg("downloaded note")
 
 	n := note.Note{}
 	err = json.Unmarshal(data.Bytes(), &n)
