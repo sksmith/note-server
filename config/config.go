@@ -3,17 +3,17 @@ package config
 import "flag"
 
 type Config struct {
-	Port            string
-	LogLevel        string
-	LogText         bool
-	Region          string
-	BucketName      string
-	Revision        string
-	ApplicationName string
-	AppVersion      string
-	Sha1Version     string
-	BuildTime       string
-	Profile         string
+	Port            string `json:"port"`
+	LogLevel        string `json:"logLevel"`
+	LogText         bool   `json:"logText"`
+	Region          string `json:"region"`
+	BucketName      string `json:"bucketName"`
+	Revision        string `json:"revision"`
+	ApplicationName string `json:"applicationName"`
+	AppVersion      string `json:"applicationVersion"`
+	Sha1Version     string `json:"sha1Version"`
+	BuildTime       string `json:"buildTime"`
+	Profile         string `json:"profile"`
 }
 
 var (

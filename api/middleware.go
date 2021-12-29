@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -37,6 +38,8 @@ func Logging(next http.Handler) http.Handler {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
 		defer func() {
+			dur := fmt.Sprintf("%dms", time.Duration(time.Since(start).Milliseconds()))
+
 			log.Info().
 				Str("method", r.Method).
 				Str("host", r.Host).
@@ -44,7 +47,7 @@ func Logging(next http.Handler) http.Handler {
 				Str("proto", r.Proto).
 				Int("status", ww.Status()).
 				Int("bytes", ww.BytesWritten()).
-				Dur("duration", time.Since(start)).Send()
+				Str("duration", dur).Send()
 		}()
 		next.ServeHTTP(ww, r)
 	}

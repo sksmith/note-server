@@ -38,7 +38,7 @@ jobs:
       - name: Set Build Variables
         run: |
           echo "VER=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_ENV
-          echo "SHA1=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+          echo "SHA1=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_ENV
           echo "NOW=$(date -u +'%Y-%m-%d_%TZ')" >> $GITHUB_ENV
     
       - name: Configure AWS credentials

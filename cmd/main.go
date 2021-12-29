@@ -40,7 +40,7 @@ func main() {
 	userService := user.NewService()
 
 	log.Info().Msg("configuring router...")
-	r := configureRouter(userService, noteService)
+	r := configureRouter(cfg, userService, noteService)
 
 	log.Info().Str("port", cfg.Port).Msg("listening")
 	log.Fatal().Err(http.ListenAndServe(":"+cfg.Port, r))
@@ -89,7 +89,7 @@ func printLogHeader(c config.Config) {
 	}
 }
 
-func configureRouter(userService user.Service, service api.NoteService) chi.Router {
+func configureRouter(cfg config.Config, userService user.Service, service api.NoteService) chi.Router {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -107,11 +107,18 @@ func configureRouter(userService user.Service, service api.NoteService) chi.Rout
 
 	r.Handle("/metrics", promhttp.Handler())
 
+	r.Route("/env", envApi(cfg))
+
 	r.With(api.Authenticate(userService)).Route("/api/v1", func(r chi.Router) {
 		r.Route("/note", noteApi(service))
 	})
 
 	return r
+}
+
+func envApi(cfg config.Config) func(r chi.Router) {
+	envApi := api.NewEnvApi(cfg)
+	return envApi.ConfigureRouter
 }
 
 func noteApi(s api.NoteService) func(r chi.Router) {
