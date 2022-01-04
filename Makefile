@@ -33,5 +33,5 @@ docker:
 		--build-arg SHA1=$(SHA1) .
 
 tools:
-	go install github.com/securego/gosec/v2/cmd/gosec@latest
+	go install github.com/securego/gosec/v2/cmd/gosec
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.43.0
