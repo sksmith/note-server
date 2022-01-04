@@ -12,6 +12,13 @@ require (
 )
 
 require (
+	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/prometheus/client_model v0.2.0 // indirect
+)
+
+require (
 	github.com/aws/aws-sdk-go v1.42.25
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
